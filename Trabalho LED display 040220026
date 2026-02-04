@@ -1,0 +1,159 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+int op = 0;
+int limit = 3;
+bool selected = false;
+bool Leds[4] ={false, false, false, false};
+int count = 0;
+int Led0 = 24; 
+int Led1 = 26;
+int Led2 = 28;
+int Led3 = 30;
+/*
+ */
+
+void setup() {
+  lcd.begin(16, 2);
+  lcd.print("Jubei");
+  delay(1000);
+  lcd.clear();
+  pinMode(Led0, OUTPUT);
+  pinMode(Led1, OUTPUT);
+  pinMode(Led2, OUTPUT);
+  pinMode(Led3, OUTPUT);
+}
+
+void loop() {
+  int leitura = analogRead(A0);
+
+  if(count == 15) {
+    TelaDescanso(leitura);
+  } else {
+  if(selected) {
+    Tela2(leitura);
+    if(leitura < 1023) {count = 0;}
+  } else if(!selected) {
+    Tela1(leitura);
+    if(leitura < 1023) {count = 0;}
+  }
+    
+  if(leitura >= 601 && leitura < 800) {
+    selected = !selected;
+  }
+      count++;
+  }
+  ControlRele();
+  delay(200);
+  lcd.clear();
+}
+
+void Tela1(int leitura) {
+  lcd.setCursor(0,0);
+  if(op == 0) {
+    lcd.print("> Luz da Sala");
+  }
+  if(op == 1) {
+    lcd.print("> Ventilador");
+  }
+  if(op == 2) {
+    lcd.print("> Tomadas");
+  }
+  if(op == 3) {
+    lcd.print("> Alarme");
+  }
+  lcd.setCursor(0,1);
+  lcd.setCursor(0,1);
+  lcd.print("Select = Entrar");
+
+  // Down
+  if(leitura >= 201 && leitura < 400) {
+    op++;
+    
+  }
+
+  // Up
+  if(leitura >= 51 && leitura < 200) {
+    op--;
+    
+  }
+
+  if(op > limit) {
+    op = 0;
+    
+  }
+  if(op < 0) {
+    op = sizeof(Leds)-1;
+  }
+
+}
+
+void TelaDescanso(int leitura) {
+  lcd.setCursor(0,0);
+  lcd.print("HOUSE CONTROL");
+  lcd.setCursor(0,1);
+  lcd.setCursor(0,1);
+  lcd.print("Pressione Tecla!");
+  if(leitura < 1023) {
+    count = 0;
+  }
+}
+
+void ControlRele() {
+  if(Leds[0]) {
+    digitalWrite(Led0, HIGH);
+  }else {
+    digitalWrite(Led0, LOW);
+  }
+
+  if(Leds[1]) {
+    digitalWrite(Led1, HIGH);
+  }else {
+    digitalWrite(Led1, LOW);
+  }
+
+  if(Leds[2]) {
+    digitalWrite(Led2, HIGH);
+  }else {
+    digitalWrite(Led2, LOW);
+  }
+
+  if(Leds[3]) {
+    digitalWrite(Led3, HIGH);
+  }else {
+    digitalWrite(Led3, LOW);
+  }
+}
+
+void Tela2(int leitura) {
+  lcd.setCursor(0,0);
+  if(op == 0) {
+    lcd.print("> Luz da Sala");
+  }
+  if(op == 1) {
+    lcd.print("> Ventilador");
+  }
+  if(op == 2) {
+    lcd.print("> Tomadas");
+  }
+  if(op == 3) {
+    lcd.print("> Alarme");
+  }
+  lcd.setCursor(0,1);
+
+// Right
+  if(leitura <= 50 & leitura >= 0) {
+    Leds[op] = true;
+  }
+  // Lefth
+  if(leitura < 600 && leitura >= 401) {
+    Leds[op] = false;
+  }
+
+  if(Leds[op]) {
+    lcd.print("On");
+  } else {
+    lcd.print("Off");
+  }
+  lcd.print(" Sel = Voltar");
+}
